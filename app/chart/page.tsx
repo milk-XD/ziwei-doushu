@@ -3,7 +3,6 @@ import { useState } from 'react';
 import BirthForm from '@/components/BirthForm';
 import ChartBoard from '@/components/ChartBoard';
 import InsightPanel from '@/components/InsightPanel';
-import TimeNav, { type TimeView } from '@/components/TimeNav';
 import { generateChart } from '@/lib/ziwei/algorithm';
 import type { BirthInfo, ZiweiChart, Palace } from '@/lib/ziwei/types';
 
@@ -16,12 +15,14 @@ import type { BirthInfo, ZiweiChart, Palace } from '@/lib/ziwei/types';
  * 说明：线上商业版的完整交互界面（重设计的新 UI、AI 流式解读、合盘、分享
  * 卡片等）不在开源范围内；但排盘内核——安星算法、四化、格局识别、古籍库——
  * 完全开放（见 lib/ziwei/*），可自由二次开发出你自己的界面。
+ *
+ * 本地修改（2026-11-01, Muse）：删除页面层重复渲染的 TimeNav——它与
+ * ChartBoard 内部那套状态不连通、点了不改变盘面；时间视角切换统一由
+ * ChartBoard 内部的 TimeNav 负责。
  */
 export default function ChartPage() {
   const [chart, setChart] = useState<ZiweiChart | null>(null);
   const [selectedPalace, setSelectedPalace] = useState<Palace | null>(null);
-  const [view, setView] = useState<TimeView>('mingpan');
-  const [liunianYear, setLiunianYear] = useState(() => new Date().getFullYear());
 
   // ── 未起盘：展示出生信息表单 ──
   if (!chart) {
@@ -51,14 +52,6 @@ export default function ChartPage() {
       >
         ← 重新起盘
       </button>
-
-      <TimeNav
-        chart={chart}
-        view={view}
-        liunianYear={liunianYear}
-        onViewChange={setView}
-        onYearChange={setLiunianYear}
-      />
 
       <div
         style={{
